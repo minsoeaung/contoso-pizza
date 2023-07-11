@@ -1,5 +1,7 @@
 using ContosoPizza.Data;
 using ContosoPizza.Services;
+using Microsoft.EntityFrameworkCore;
+using TodoApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +12,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add the PizzaContext
 builder.Services.AddSqlite<PizzaContext>("Data Source=ContosoPizza.db");
 builder.Services.AddSqlite<PromotionsContext>("Data Source=Promotions/Promotions.db");
+builder.Services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
 
 builder.Services.AddScoped<PizzaService>();
 

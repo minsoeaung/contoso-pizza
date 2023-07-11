@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ContosoPizza.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class PizzaController : ControllerBase
 {
     private readonly PizzaService _service;

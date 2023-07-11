@@ -16,9 +16,56 @@ public class TodoController : ControllerBase
         _context = context;
     }
 
+    // If say nothing like [FromQuery],
+    //      default to query params.
+    // Upon inserting IEnumerable<int> todoItem to argument list, 
+    //      "Request with GET/HEAD method cannot have body." error occurred.
+
+    [HttpGet("query-params")]
+    public int GetQueryTest(bool isIt, string? name)
+    {
+        return 1;
+    }
+
+    // Cannot have more than one parameter for post request.
+    [HttpPost("post-json")]
+    [Consumes("application/json")]
+    public IActionResult PostJson(IEnumerable<TodoItemDto> todoItem)
+    {
+        return Ok(new { Todo = todoItem });
+    }
+
+    [HttpPost("post-file")]
+    public async Task<IActionResult> OnPostUploadAsync(List<IFormFile> files)
+    {
+        var size = files.Sum(f => f.Length);
+
+        foreach (var formFile in files)
+        {
+            if (formFile.Length <= 0) continue;
+            var filePath = Path.GetTempFileName();
+
+            using (var stream = System.IO.File.Create(filePath))
+            {
+                await formFile.CopyToAsync(stream);
+            }
+        }
+
+        // Process uploaded files
+        // Don't rely on or trust the FileName property without validation.
+
+        return Ok(new { count = files.Count, size });
+    }
+
+    [HttpPost("post-form")]
+    public IActionResult PostForm([FromForm] IEnumerable<int> numbers, [FromForm] IEnumerable<string> names)
+    {
+        return Ok(new { Numbers = numbers, Names = names });
+    }
+
     // GET: api/Todo
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItems()
+    public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItems([FromQuery] string someQ = "nice query")
     {
         return await _context.TodoItems
             .Select(x => ItemToDTO(x))
@@ -73,6 +120,8 @@ public class TodoController : ControllerBase
     // POST: api/Todo
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TodoItemDto>> PostTodoItem(TodoItemDto todoDto)
     {
         var todoItem = new TodoItem

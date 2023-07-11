@@ -4,7 +4,7 @@ namespace ContosoPizza.Data;
 
 public static class DbInitializer
 {
-    public static void Initialize(PizzaContext context)
+    public static void Initialize(ContosoContext context)
     {
         if (context.Pizzas.Any()
             && context.Toppings.Any()

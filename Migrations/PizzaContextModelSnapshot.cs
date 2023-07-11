@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ContosoPizza.Migrations
 {
-    [DbContext(typeof(PizzaContext))]
+    [DbContext(typeof(ContosoContext))]
     partial class PizzaContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

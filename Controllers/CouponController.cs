@@ -9,9 +9,9 @@ namespace ContosoPizza.Controllers;
 [Route("[controller]")]
 public class CouponController : ControllerBase
 {
-    private readonly PromotionsContext _context;
+    private readonly ContosoContext _context;
 
-    public CouponController(PromotionsContext context)
+    public CouponController(ContosoContext context)
     {
         _context = context;
     }

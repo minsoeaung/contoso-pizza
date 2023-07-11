@@ -6,9 +6,9 @@ namespace ContosoPizza.Services;
 
 public class PizzaService
 {
-    private readonly PizzaContext _context;
+    private readonly ContosoContext _context;
 
-    public PizzaService(PizzaContext context)
+    public PizzaService(ContosoContext context)
     {
         _context = context;
     }

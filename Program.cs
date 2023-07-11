@@ -1,21 +1,15 @@
 using ContosoPizza.Data;
 using ContosoPizza.Services;
 using Microsoft.EntityFrameworkCore;
-using TodoApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
-builder.Services.AddSqlite<PizzaContext>("Data Source=ContosoPizza.db");
-builder.Services.AddSqlite<PromotionsContext>("Data Source=Promotions/Promotions.db");
-builder.Services.AddDbContext<TodoContext>(opt => opt.UseInMemoryDatabase("TodoList"));
-
+builder.Services.AddDbContext<ContosoContext>(opt =>
+    opt.UseNpgsql("Host=localhost;Database=contoso_pizza;Username=msa;Password=vcrn"));
 builder.Services.AddScoped<PizzaService>();
 
 var app = builder.Build();

@@ -1,7 +1,7 @@
+using ContosoPizza.Data;
 using ContosoPizza.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TodoApi.Models;
 
 namespace ContosoPizza.Controllers;
 
@@ -9,9 +9,9 @@ namespace ContosoPizza.Controllers;
 [ApiController]
 public class TodoController : ControllerBase
 {
-    private readonly TodoContext _context;
+    private readonly ContosoContext _context;
 
-    public TodoController(TodoContext context)
+    public TodoController(ContosoContext context)
     {
         _context = context;
     }

@@ -1,6 +1,6 @@
 ﻿namespace ContosoPizza.Models;
 
-public partial class Coupon
+public class Coupon
 {
     public long Id { get; set; }
 

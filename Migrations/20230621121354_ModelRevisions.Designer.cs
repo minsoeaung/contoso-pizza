@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ContosoPizza.Migrations
 {
-    [DbContext(typeof(PizzaContext))]
+    [DbContext(typeof(ContosoContext))]
     [Migration("20230621121354_ModelRevisions")]
     partial class ModelRevisions
     {

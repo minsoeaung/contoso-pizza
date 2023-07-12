@@ -79,17 +79,21 @@ namespace ContosoPizza.Controllers
         // POST: api/Student
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [ProducesResponseType(typeof(Student), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Student>> PostStudent(StudentDTO student)
         {
-            var newStudent = new Student()
+            // How can I make enrollments empty array instead of null
+            // Get one Get all work just fine with sending empty array.
+            var createdNewStudent = _context.Students.Add(new Student()
             {
-                FirstName = student.FirstName, LastName = student.LastName,
+                FirstName = student.FirstName,
+                LastName = student.LastName,
                 EnrollmentDate = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
-            };
-            _context.Students.Add(newStudent);
+            });
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetStudent), new { id = student.Id }, student);
+            return CreatedAtAction(nameof(GetStudent), new { id = student.Id }, createdNewStudent.Entity);
         }
 
         // DELETE: api/Student/5

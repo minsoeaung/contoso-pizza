@@ -1,10 +1,20 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace ContosoPizza.Models;
 
 public class Student
 {
     public int Id { get; set; }
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
+
+    [Required]
+    [StringLength(50, MinimumLength = 2)]
+    public string FirstName { get; set; }
+
+    [StringLength(50)] public string LastName { get; set; }
+
+    public string FullName => FirstName + " " + LastName;
+
     public DateTime EnrollmentDate { get; set; }
+
     public ICollection<Enrollment> Enrollments { get; set; }
 }

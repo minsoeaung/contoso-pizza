@@ -14,4 +14,14 @@ public class ContosoContext : DbContext
     public DbSet<Sauce> Sauces => Set<Sauce>();
     public DbSet<Coupon> Coupons => Set<Coupon>();
     public DbSet<TodoItem> TodoItems => Set<TodoItem>();
+    public DbSet<Student> Students => Set<Student>();
+    public DbSet<Enrollment> Enrollments => Set<Enrollment>();
+    public DbSet<Course> Courses => Set<Course>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Course>().ToTable("Course");
+        modelBuilder.Entity<Enrollment>().ToTable("Enrollment");
+        modelBuilder.Entity<Student>().ToTable("Student");
+    }
 }

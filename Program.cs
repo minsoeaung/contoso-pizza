@@ -12,6 +12,8 @@ builder.Services.AddDbContext<ContosoContext>(opt =>
     opt.UseNpgsql("Host=localhost;Database=contoso_pizza;Username=msa;Password=vcrn"));
 builder.Services.AddScoped<PizzaService>();
 
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -19,6 +21,8 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
+    app.UseMigrationsEndPoint();
 }
 
 app.UseHttpsRedirection();

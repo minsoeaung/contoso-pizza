@@ -50,13 +50,48 @@ namespace ContosoPizza.migrations
                     b.Property<int>("Credits")
                         .HasColumnType("integer");
 
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DepartmentId");
+
                     b.ToTable("Course", (string)null);
+                });
+
+            modelBuilder.Entity("ContosoPizza.Models.Department", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Budget")
+                        .HasColumnType("money");
+
+                    b.Property<int?>("InstructorId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InstructorId");
+
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("ContosoPizza.Models.Enrollment", b =>
@@ -83,6 +118,50 @@ namespace ContosoPizza.migrations
                     b.HasIndex("StudentId");
 
                     b.ToTable("Enrollment", (string)null);
+                });
+
+            modelBuilder.Entity("ContosoPizza.Models.Instructor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateOfBirth")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("HireDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Instructors");
+                });
+
+            modelBuilder.Entity("ContosoPizza.Models.OfficeAssignment", b =>
+                {
+                    b.Property<int>("InstructorId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("InstructorId");
+
+                    b.ToTable("OfficeAssignments");
                 });
 
             modelBuilder.Entity("ContosoPizza.Models.Pizza", b =>
@@ -198,6 +277,21 @@ namespace ContosoPizza.migrations
                     b.ToTable("Toppings");
                 });
 
+            modelBuilder.Entity("CourseInstructor", b =>
+                {
+                    b.Property<int>("CoursesId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("InstructorsId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("CoursesId", "InstructorsId");
+
+                    b.HasIndex("InstructorsId");
+
+                    b.ToTable("CourseInstructor");
+                });
+
             modelBuilder.Entity("PizzaTopping", b =>
                 {
                     b.Property<int>("PizzasId")
@@ -211,6 +305,26 @@ namespace ContosoPizza.migrations
                     b.HasIndex("ToppingsId");
 
                     b.ToTable("PizzaTopping");
+                });
+
+            modelBuilder.Entity("ContosoPizza.Models.Course", b =>
+                {
+                    b.HasOne("ContosoPizza.Models.Department", "Department")
+                        .WithMany("Courses")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
+            modelBuilder.Entity("ContosoPizza.Models.Department", b =>
+                {
+                    b.HasOne("ContosoPizza.Models.Instructor", "Administrator")
+                        .WithMany()
+                        .HasForeignKey("InstructorId");
+
+                    b.Navigation("Administrator");
                 });
 
             modelBuilder.Entity("ContosoPizza.Models.Enrollment", b =>
@@ -232,6 +346,17 @@ namespace ContosoPizza.migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("ContosoPizza.Models.OfficeAssignment", b =>
+                {
+                    b.HasOne("ContosoPizza.Models.Instructor", "Instructor")
+                        .WithOne("OfficeAssignment")
+                        .HasForeignKey("ContosoPizza.Models.OfficeAssignment", "InstructorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Instructor");
+                });
+
             modelBuilder.Entity("ContosoPizza.Models.Pizza", b =>
                 {
                     b.HasOne("ContosoPizza.Models.Sauce", "Sauce")
@@ -239,6 +364,21 @@ namespace ContosoPizza.migrations
                         .HasForeignKey("SauceId");
 
                     b.Navigation("Sauce");
+                });
+
+            modelBuilder.Entity("CourseInstructor", b =>
+                {
+                    b.HasOne("ContosoPizza.Models.Course", null)
+                        .WithMany()
+                        .HasForeignKey("CoursesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ContosoPizza.Models.Instructor", null)
+                        .WithMany()
+                        .HasForeignKey("InstructorsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PizzaTopping", b =>
@@ -259,6 +399,17 @@ namespace ContosoPizza.migrations
             modelBuilder.Entity("ContosoPizza.Models.Course", b =>
                 {
                     b.Navigation("Enrollments");
+                });
+
+            modelBuilder.Entity("ContosoPizza.Models.Department", b =>
+                {
+                    b.Navigation("Courses");
+                });
+
+            modelBuilder.Entity("ContosoPizza.Models.Instructor", b =>
+                {
+                    b.Navigation("OfficeAssignment")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ContosoPizza.Models.Student", b =>

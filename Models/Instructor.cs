@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ContosoPizza.Models;
 
-public class Student
+public class Instructor
 {
     public int Id { get; set; }
 
@@ -12,7 +12,11 @@ public class Student
 
     public string FullName => FirstName + " " + LastName;
 
-    public DateTime EnrollmentDate { get; set; }
+    [Required] public DateTime DateOfBirth { get; set; }
 
-    public ICollection<Enrollment> Enrollments { get; set; }
+    [Required] public DateTime HireDate { get; set; }
+
+    public ICollection<Course> Courses { get; set; }
+
+    public OfficeAssignment OfficeAssignment { get; set; }
 }

@@ -17,11 +17,16 @@ public class ContosoContext : DbContext
     public DbSet<Student> Students => Set<Student>();
     public DbSet<Enrollment> Enrollments => Set<Enrollment>();
     public DbSet<Course> Courses => Set<Course>();
+    public DbSet<Department> Departments => Set<Department>();
+    public DbSet<Instructor> Instructors => Set<Instructor>();
+    public DbSet<OfficeAssignment> OfficeAssignments => Set<OfficeAssignment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Course>().ToTable("Course");
-        modelBuilder.Entity<Enrollment>().ToTable("Enrollment");
-        modelBuilder.Entity<Student>().ToTable("Student");
+        modelBuilder.Entity<Course>().ToTable(nameof(Course))
+            .HasMany(c => c.Instructors)
+            .WithMany(i => i.Courses);
+        modelBuilder.Entity<Enrollment>().ToTable(nameof(Enrollment));
+        modelBuilder.Entity<Student>().ToTable(nameof(Student));
     }
 }

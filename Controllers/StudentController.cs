@@ -89,7 +89,6 @@ namespace ContosoPizza.Controllers
             {
                 FirstName = student.FirstName,
                 LastName = student.LastName,
-                EnrollmentDate = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc),
             });
             await _context.SaveChangesAsync();
 

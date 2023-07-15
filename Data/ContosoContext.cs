@@ -23,10 +23,5 @@ public class ContosoContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Course>().ToTable(nameof(Course))
-            .HasMany(c => c.Instructors)
-            .WithMany(i => i.Courses);
-        modelBuilder.Entity<Enrollment>().ToTable(nameof(Enrollment));
-        modelBuilder.Entity<Student>().ToTable(nameof(Student));
     }
 }

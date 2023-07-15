@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ContosoPizza.Models;
 
@@ -17,7 +18,7 @@ public class Department
 
     // If "InstructorId" is not nullable, Department would be deleted when the instructor assigned is deleted.
     // Now it is prevented by specifying it is nullable.
-    public int? InstructorId { get; set; }
+    [JsonIgnore] public int? InstructorId { get; set; }
 
     public Instructor Administrator { get; set; }
 

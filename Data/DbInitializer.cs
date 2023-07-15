@@ -224,7 +224,7 @@ public static class DbInitializer
             Id = 1050,
             Title = "Chemistry",
             Credits = 3,
-            // Department = engineering,
+            Department = engineering,
             Instructors = new List<Instructor> { kapoor, harui }
         };
 
@@ -233,7 +233,7 @@ public static class DbInitializer
             Id = 4022,
             Title = "Microeconomics",
             Credits = 3,
-            // Department = economics,
+            Department = economics,
             Instructors = new List<Instructor> { zheng }
         };
 
@@ -242,7 +242,7 @@ public static class DbInitializer
             Id = 4041,
             Title = "Macroeconomics",
             Credits = 3,
-            // Department = economics,
+            Department = economics,
             Instructors = new List<Instructor> { zheng }
         };
 
@@ -251,7 +251,7 @@ public static class DbInitializer
             Id = 1045,
             Title = "Calculus",
             Credits = 4,
-            // Department = mathematics,
+            Department = mathematics,
             Instructors = new List<Instructor> { fakhouri }
         };
 
@@ -260,7 +260,7 @@ public static class DbInitializer
             Id = 3141,
             Title = "Trigonometry",
             Credits = 4,
-            // Department = mathematics,
+            Department = mathematics,
             Instructors = new List<Instructor> { harui }
         };
 
@@ -269,7 +269,7 @@ public static class DbInitializer
             Id = 2021,
             Title = "Composition",
             Credits = 3,
-            // Department = english,
+            Department = english,
             Instructors = new List<Instructor> { abercrombie }
         };
 
@@ -278,7 +278,7 @@ public static class DbInitializer
             Id = 2042,
             Title = "Literature",
             Credits = 4,
-            // Department = english,
+            Department = english,
             Instructors = new List<Instructor> { abercrombie }
         };
 

@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ContosoPizza.Models;
 
@@ -13,7 +14,7 @@ public class Course
     [Range(0, 5)] public int Credits { get; set; }
 
     // FK
-    public int DepartmentId { get; set; }
+    [JsonIgnore] public int DepartmentId { get; set; }
 
     public Department Department { get; set; }
 

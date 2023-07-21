@@ -1,4 +1,5 @@
 using ContosoPizza.Data;
+using ContosoPizza.Entities;
 using ContosoPizza.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,11 +8,11 @@ namespace ContosoPizza.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class TodoController : ControllerBase
+public class TodosController : ControllerBase
 {
     private readonly ContosoContext _context;
 
-    public TodoController(ContosoContext context)
+    public TodosController(ContosoContext context)
     {
         _context = context;
     }
@@ -68,7 +69,7 @@ public class TodoController : ControllerBase
     public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItems([FromQuery] string someQ = "nice query")
     {
         return await _context.TodoItems
-            .Select(x => ItemToDTO(x))
+            .Select(x => ItemToDto(x))
             .ToListAsync();
     }
 
@@ -83,7 +84,7 @@ public class TodoController : ControllerBase
             return NotFound();
         }
 
-        return ItemToDTO(todoItem);
+        return ItemToDto(todoItem);
     }
 
     // PUT: api/Todo/5
@@ -136,7 +137,7 @@ public class TodoController : ControllerBase
         return CreatedAtAction(
             nameof(GetTodoItem),
             new { id = todoItem.Id },
-            ItemToDTO(todoItem));
+            ItemToDto(todoItem));
     }
 
     // DELETE: api/Todo/5
@@ -160,7 +161,7 @@ public class TodoController : ControllerBase
         return (_context.TodoItems?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 
-    private static TodoItemDto ItemToDTO(TodoItem todoItem)
+    private static TodoItemDto ItemToDto(TodoItem todoItem)
     {
         return new TodoItemDto
         {

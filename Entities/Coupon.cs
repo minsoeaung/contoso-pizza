@@ -1,10 +1,10 @@
-﻿namespace ContosoPizza.Models;
+﻿namespace ContosoPizza.Entities;
 
 public class Coupon
 {
     public long Id { get; set; }
 
-    public string Description { get; set; } = null!;
+    public required string Description { get; set; }
 
     public DateTime? Expiration { get; set; }
 }

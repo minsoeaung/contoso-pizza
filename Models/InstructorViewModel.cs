@@ -1,3 +1,5 @@
+using ContosoPizza.Entities;
+
 namespace ContosoPizza.Models.Views;
 
 public class InstructorViewModel

@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace ContosoPizza.Models;
+namespace ContosoPizza.Entities;
 
 // Many-to-many join table with payload for student and course.
 public class Enrollment
@@ -11,12 +9,14 @@ public class Enrollment
     public int CourseId { get; set; }
     public int StudentId { get; set; }
 
-    [DisplayFormat(NullDisplayText = "No grade")]
     public Grade? Grade { get; set; }
 
     // Navigation property
-    public Course Course { get; set; }
-    public Student Student { get; set; }
+    // Navigation property is should be non-nullable.
+    // An empty collection means that no relatable entity exists, 
+    // but the list itself should never be null.
+    public Course Course { get; set; } = null!;
+    public Student Student { get; set; } = null!;
 }
 
 public enum Grade

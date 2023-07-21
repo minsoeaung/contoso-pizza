@@ -12,7 +12,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ContosoContext>(opt =>
     opt.UseNpgsql("Host=localhost;Database=contoso_pizza;Username=msa;Password=vcrn;Include Error Detail=true"));
+
 builder.Services.AddScoped<PizzaService>();
+builder.Services.AddScoped<CourseService>();
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

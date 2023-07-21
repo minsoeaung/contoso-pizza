@@ -2,13 +2,13 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
-namespace ContosoPizza.Models;
+namespace ContosoPizza.Entities;
 
 public class Department
 {
     public int Id { get; set; }
 
-    [StringLength(50)] public string Name { get; set; }
+    [MaxLength(50)] public required string Name { get; set; }
 
     [DataType(DataType.Currency)]
     [Column(TypeName = "money")]
@@ -20,7 +20,7 @@ public class Department
     // Now it is prevented by specifying it is nullable.
     [JsonIgnore] public int? InstructorId { get; set; }
 
-    public Instructor Administrator { get; set; }
+    public Instructor Administrator { get; set; } = null!;
 
-    public ICollection<Course> Courses { get; set; }
+    public ICollection<Course> Courses { get; set; } = null!;
 }

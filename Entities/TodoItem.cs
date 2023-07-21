@@ -1,4 +1,4 @@
-namespace ContosoPizza.Models;
+namespace ContosoPizza.Entities;
 
 public class TodoItem
 {

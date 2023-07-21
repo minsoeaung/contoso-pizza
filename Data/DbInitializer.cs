@@ -1,3 +1,4 @@
+using ContosoPizza.Entities;
 using ContosoPizza.Models;
 
 namespace ContosoPizza.Data;

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ContosoPizza.Models;
+namespace ContosoPizza.Entities;
 
 public class OfficeAssignment
 {
@@ -8,7 +8,7 @@ public class OfficeAssignment
     // This is also is a FK to Instructor entity.
     [Key] public int InstructorId { get; set; }
 
-    [StringLength(50)] public string Location { get; set; }
+    [Required] [MaxLength(50)] public required string Location { get; set; }
 
-    public Instructor Instructor { get; set; }
+    public Instructor Instructor { get; set; } = null!;
 }

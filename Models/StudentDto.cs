@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ContosoPizza.Models;
 
-public class StudentDTO
+public class StudentDto
 {
     public int Id { get; set; }
 

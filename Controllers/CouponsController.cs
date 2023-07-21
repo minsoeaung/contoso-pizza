@@ -1,4 +1,5 @@
 using ContosoPizza.Data;
+using ContosoPizza.Entities;
 using ContosoPizza.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,11 +8,11 @@ namespace ContosoPizza.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class CouponController : ControllerBase
+public class CouponsController : ControllerBase
 {
     private readonly ContosoContext _context;
 
-    public CouponController(ContosoContext context)
+    public CouponsController(ContosoContext context)
     {
         _context = context;
     }

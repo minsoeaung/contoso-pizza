@@ -1,4 +1,5 @@
 using ContosoPizza.Data;
+using ContosoPizza.Entities;
 using ContosoPizza.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -76,10 +77,8 @@ public class PizzaService
     public void DeleteById(int id)
     {
         var pizzaToDelete = _context.Pizzas.Find(id);
-        if (pizzaToDelete is not null)
-        {
-            _context.Pizzas.Remove(pizzaToDelete);
-            _context.SaveChanges();
-        }
+        if (pizzaToDelete is null) return;
+        _context.Pizzas.Remove(pizzaToDelete);
+        _context.SaveChanges();
     }
 }

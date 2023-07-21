@@ -1,3 +1,4 @@
+using ContosoPizza.Entities;
 using ContosoPizza.Models;
 using Microsoft.EntityFrameworkCore;
 

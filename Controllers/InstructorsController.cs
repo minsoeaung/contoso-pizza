@@ -1,5 +1,6 @@
+using AutoMapper;
 using ContosoPizza.Data;
-using ContosoPizza.Models.Views;
+using ContosoPizza.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,28 +11,23 @@ namespace ContosoPizza.Controllers;
 public class InstructorsController : ControllerBase
 {
     private readonly ContosoContext _context;
+    private readonly IMapper _mapper;
 
-    public InstructorsController(ContosoContext context)
+    public InstructorsController(ContosoContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     // GET: api/Instructor
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<InstructorViewModel>>> GetInstructors()
+    public async Task<IEnumerable<InstructorViewModel>> GetInstructors()
     {
-        return await _context.Instructors
-            .Select(i => new InstructorViewModel
-            {
-                Id = i.Id,
-                FirstName = i.FirstName,
-                LastName = i.LastName,
-                DateOfBirth = i.DateOfBirth,
-                HireDate = i.HireDate,
-                office = i.OfficeAssignment.Location ?? "",
-                Courses = i.Courses
-            })
+        var instructors = await _context.Instructors
+            .Include(i => i.OfficeAssignment)
+            .AsNoTracking()
             .ToListAsync();
+        return _mapper.Map<IEnumerable<InstructorViewModel>>(instructors);
     }
 
     // GET: api/Instructor/5
@@ -39,30 +35,8 @@ public class InstructorsController : ControllerBase
     public async Task<ActionResult<InstructorViewModel>> GetInstructor(int id)
     {
         var instructor = await _context.Instructors
-            .Include(i => i.Courses)
-            .ThenInclude(c => c.Department)
-            .Select(i => new InstructorViewModel
-            {
-                Id = i.Id,
-                FirstName = i.FirstName,
-                LastName = i.LastName,
-                DateOfBirth = i.DateOfBirth,
-                HireDate = i.HireDate,
-                office = i.OfficeAssignment.Location ?? "",
-                Courses = i.Courses
-            })
+            .AsNoTracking()
             .FirstOrDefaultAsync(i => i.Id == id);
-
-        if (instructor == null)
-        {
-            return NotFound();
-        }
-
-        return instructor;
-    }
-
-    private bool InstructorExists(int id)
-    {
-        return (_context.Instructors?.Any(e => e.Id == id)).GetValueOrDefault();
+        return instructor is null ? NotFound() : _mapper.Map<InstructorViewModel>(instructor);
     }
 }

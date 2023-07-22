@@ -1,6 +1,4 @@
-using ContosoPizza.Entities;
-
-namespace ContosoPizza.Models.Views;
+namespace ContosoPizza.Models;
 
 public class InstructorViewModel
 {
@@ -11,7 +9,5 @@ public class InstructorViewModel
 
     public DateTime DateOfBirth { get; set; }
     public DateTime HireDate { get; set; }
-    public ICollection<Course> Courses { get; set; }
-
-    public string office { get; set; }
+    public string Office { get; set; }
 }

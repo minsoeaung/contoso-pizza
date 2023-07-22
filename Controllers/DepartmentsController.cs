@@ -1,7 +1,7 @@
+using AutoMapper;
 using ContosoPizza.Data;
 using ContosoPizza.Entities;
 using ContosoPizza.Models;
-using ContosoPizza.Models.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,46 +12,34 @@ namespace ContosoPizza.Controllers;
 public class DepartmentsController : ControllerBase
 {
     private readonly ContosoContext _context;
+    private readonly IMapper _mapper;
 
-    public DepartmentsController(ContosoContext context)
+    public DepartmentsController(ContosoContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     // GET: api/Department
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<DepartmentDto>>> GetDepartments()
+    public async Task<ActionResult<IEnumerable<Department>>> GetDepartments()
     {
-        var departmentsQuery =
-            from d in _context.Departments
-            orderby d.Name
-            select new DepartmentDto { Id = d.Id, Name = d.Name };
-
-        return await departmentsQuery.ToListAsync();
+        var departments = await _context.Departments
+            .Include(d => d.Administrator)
+            .AsNoTracking()
+            .ToListAsync();
+        return Ok(_mapper.Map<IEnumerable<DepartmentDto>>(departments));
     }
 
     // GET: api/Department/5
     [HttpGet("{id}")]
     public async Task<ActionResult<DepartmentDto>> GetDepartment(int id)
     {
-        var departmentQuery =
-            from d in _context.Departments
-            select new DepartmentDto { Id = d.Id, Name = d.Name };
-        var result = await departmentQuery.FirstOrDefaultAsync(d => d.Id == id);
-        return result is not null ? result : NotFound();
-    }
-
-    private bool DepartmentExists(int id)
-    {
-        return (_context.Departments?.Any(e => e.Id == id)).GetValueOrDefault();
-    }
-
-    private static DepartmentDto DepartmentToDto(Department department)
-    {
-        return new DepartmentDto
-        {
-            Id = department.Id,
-            Name = department.Name,
-        };
+        var department = await _context.Departments
+            .Include(d => d.Administrator)
+            .Where(d => d.Id == id)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+        return department is null ? NotFound() : _mapper.Map<DepartmentDto>(department);
     }
 }

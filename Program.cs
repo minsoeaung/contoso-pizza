@@ -16,6 +16,8 @@ builder.Services.AddDbContext<ContosoContext>(opt =>
 builder.Services.AddScoped<PizzaService>();
 builder.Services.AddScoped<CourseService>();
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 var app = builder.Build();

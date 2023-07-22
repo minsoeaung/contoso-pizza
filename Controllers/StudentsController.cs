@@ -1,3 +1,4 @@
+using AutoMapper;
 using ContosoPizza.Data;
 using ContosoPizza.Entities;
 using ContosoPizza.Models;
@@ -11,26 +12,29 @@ namespace ContosoPizza.Controllers;
 public class StudentsController : ControllerBase
 {
     private readonly ContosoContext _context;
+    private readonly IMapper _mapper;
 
-    public StudentsController(ContosoContext context)
+    public StudentsController(ContosoContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     // GET: api/Student
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
+    public async Task<IEnumerable<StudentViewModel>> GetStudents()
     {
-        return await _context.Students
+        var students = await _context.Students
             .Include(s => s.Enrollments)
             .ThenInclude(e => e.Course)
             .AsNoTracking()
             .ToListAsync();
+        return _mapper.Map<IEnumerable<StudentViewModel>>(students);
     }
 
     // GET: api/Student/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Student>> GetStudent(int id)
+    public async Task<ActionResult<StudentViewModel>> GetStudent(int id)
     {
         var student = await _context.Students
             .Include(s => s.Enrollments)
@@ -43,7 +47,7 @@ public class StudentsController : ControllerBase
             return NotFound();
         }
 
-        return student;
+        return _mapper.Map<StudentViewModel>(student);
     }
 
     // PUT: api/Student/5
@@ -78,22 +82,19 @@ public class StudentsController : ControllerBase
     }
 
     // POST: api/Student
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    [ProducesResponseType(typeof(Student), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Student>> PostStudent(StudentDto student)
+    public async Task<ActionResult<Student>> PostStudent(StudentDto studentDto)
     {
-        // How can I make enrollments empty array instead of null
-        // Get one Get all work just fine with sending empty array.
-        var createdNewStudent = _context.Students.Add(new Student()
-        {
-            FirstName = student.FirstName,
-            LastName = student.LastName,
-        });
+        var student = _mapper.Map<Student>(studentDto);
+        var createdStudent = _context.Students.Add(student);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetStudent), new { id = student.Id }, createdNewStudent.Entity);
+        return CreatedAtAction(
+            nameof(GetStudent),
+            new { id = createdStudent.Entity.Id },
+            // TODO: enrollments should be empty array if null
+            createdStudent.Entity
+        );
     }
 
     // DELETE: api/Student/5
@@ -102,15 +103,15 @@ public class StudentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DeleteStudent(int id)
     {
-        var student = await _context.Students
+        var studentToDelete = await _context.Students
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Id == id);
-        if (student == null)
+        if (studentToDelete == null)
         {
             return NotFound();
         }
 
-        _context.Students.Remove(student);
+        _context.Students.Remove(studentToDelete);
         await _context.SaveChangesAsync();
 
         return NoContent();

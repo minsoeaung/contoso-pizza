@@ -1,5 +1,7 @@
+using System.Text.Json;
+using AutoMapper;
+using ContosoPizza.Entities;
 using ContosoPizza.Models;
-using ContosoPizza.Models.Views;
 using ContosoPizza.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,33 +12,31 @@ namespace ContosoPizza.Controllers;
 public class CoursesController : ControllerBase
 {
     private readonly CourseService _service;
+    private readonly IMapper _mapper;
 
-    public CoursesController(CourseService service)
+    public CoursesController(CourseService service, IMapper mapper)
     {
         _service = service;
+        _mapper = mapper;
     }
 
-    // GET: api/Course
     [HttpGet]
-    public IEnumerable<CourseViewModel> GetCourses()
+    public async Task<IEnumerable<CourseViewModel>> GetCourses(int pageNumber = 1, int pageSize = 20)
     {
-        return _service.GetCourses();
+        var (courses, paginationMetaData) = await _service.GetCourses(pageNumber, pageSize);
+        Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetaData));
+        return _mapper.Map<IEnumerable<CourseViewModel>>(courses);
     }
 
-    // GET: api/Course/5
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(CourseViewModel), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public ActionResult<CourseViewModel> GetCourse(int id)
+    public async Task<ActionResult<CourseViewModel>> GetCourse(int id)
     {
-        var result = _service.GetCourseViewModel(id);
-        return result == null ? NotFound() : result;
+        var result = await _service.GetCourse(id);
+        return result == null ? NotFound() : _mapper.Map<CourseViewModel>(result);
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(CourseDto), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public ActionResult<CourseDto> Create(CourseDto courseDto)
+    public ActionResult<Course> Create(CourseDto courseDto)
     {
         if (
             !_service.DepartmentExists(courseDto.DepartmentId) ||
@@ -46,22 +46,21 @@ public class CoursesController : ControllerBase
         )
             return BadRequest();
 
-        _service.AddCourse(courseDto);
+        var course = _mapper.Map<Course>(courseDto);
+        _service.AddCourse(course);
         _service.Save();
 
         return CreatedAtAction(
             nameof(GetCourse),
             new { id = courseDto.Id },
-            courseDto
+            course
         );
     }
 
     [HttpDelete("{id}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public ActionResult DeleteCourse(int id)
+    public async Task<ActionResult> DeleteCourse(int id)
     {
-        var courseToDelete = _service.GetCourse(id);
+        var courseToDelete = await _service.GetCourse(id);
         if (courseToDelete == null)
         {
             return NotFound();

@@ -1,3 +1,5 @@
+using Microsoft.Build.Framework;
+
 namespace ContosoPizza.Models;
 
 public class CourseDto

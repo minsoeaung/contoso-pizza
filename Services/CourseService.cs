@@ -1,69 +1,52 @@
+using AutoMapper;
 using ContosoPizza.Data;
 using ContosoPizza.Entities;
-using ContosoPizza.Models;
-using ContosoPizza.Models.Views;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContosoPizza.Services;
 
 public class CourseService
 {
     private readonly ContosoContext _context;
+    private readonly IMapper _mapper;
 
 
-    public CourseService(ContosoContext context)
+    public CourseService(ContosoContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
-    public IEnumerable<CourseViewModel> GetCourses()
+    public async Task<(IEnumerable<Course>, PaginationMetaData)> GetCourses(int pageNumber, int pageSize)
     {
-        var courses =
-            from course in _context.Courses
-            orderby course.Title
-            select new CourseViewModel()
-            {
-                Title = course.Title,
-                DepartmentName = course.Department.Name,
-                Credits = course.Credits,
-                Id = course.Id
-            };
-        return courses;
+        var totalItemCount = await _context.Courses.CountAsync();
+        var paginationMetaData = new PaginationMetaData(totalItemCount, pageNumber, pageSize);
+        var courses = await _context.Courses
+            .Include(c => c.Department)
+            .OrderBy(c => c.Title)
+            .Skip(pageSize * (pageNumber - 1))
+            .Take(pageSize)
+            .AsNoTracking()
+            .ToListAsync();
+        return (
+            courses,
+            paginationMetaData
+        );
     }
 
-    public CourseViewModel? GetCourseViewModel(int id)
+    public async Task<Course?> GetCourse(int id)
     {
-        var courses =
-            from course in _context.Courses
-            where course.Id == id
-            select new CourseViewModel()
-            {
-                Title = course.Title,
-                DepartmentName = course.Department.Name,
-                Credits = course.Credits,
-                Id = course.Id
-            };
-        return courses.FirstOrDefault();
+        var course = await _context.Courses
+            .Where(c => c.Id == id)
+            .Include(c => c.Department)
+            .AsNoTracking()
+            .FirstOrDefaultAsync();
+        return course;
     }
 
-    public Course? GetCourse(int id)
+    public void AddCourse(Course course)
     {
-        var courses =
-            from course in _context.Courses
-            where course.Id == id
-            select course;
-        return courses.FirstOrDefault();
-    }
-
-    public void AddCourse(CourseDto course)
-    {
-        var newCourse = new Course()
-        {
-            Title = course.Title.Trim(),
-            Credits = course.Credit,
-            Id = course.Id,
-            DepartmentId = course.DepartmentId
-        };
-        _context.Courses.Add(newCourse);
+        _context.Courses.Add(course);
     }
 
     public void DeleteCourse(Course course)

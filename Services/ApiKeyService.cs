@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ContosoPizza.Services;
 
-public class ApiKeyService
+public class ApiKeyService : IApiKeyService
 {
     private readonly ContosoContext _context;
 

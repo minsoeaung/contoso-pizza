@@ -15,7 +15,7 @@ public class CouponsController : ControllerBase
     private readonly ContosoContext _context;
 
     private const string AuthSchemes =
-        $"{JwtBearerDefaults.AuthenticationScheme},${ApiKeyDefaults.AuthenticationScheme}";
+        $"{JwtBearerDefaults.AuthenticationScheme},{ApiKeyDefaults.AuthenticationScheme}";
 
     public CouponsController(ContosoContext context)
     {

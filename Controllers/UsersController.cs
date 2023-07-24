@@ -11,10 +11,10 @@ namespace ContosoPizza.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager;
-    private readonly JwtService _jwtService;
-    private readonly ApiKeyService _apiKeyService;
+    private readonly IJwtService _jwtService;
+    private readonly IApiKeyService _apiKeyService;
 
-    public UsersController(UserManager<IdentityUser> userManager, JwtService jwtService, ApiKeyService apiKeyService)
+    public UsersController(UserManager<IdentityUser> userManager, IJwtService jwtService, IApiKeyService apiKeyService)
     {
         _userManager = userManager;
         _jwtService = jwtService;

@@ -21,14 +21,14 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    options.AddSecurityDefinition("ApiBearerAuth", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
         Description = "Please enter jwt token",
         Name = "Authentication",
         Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
-        Scheme = "bearer"
+        Scheme = "Bearer"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -39,7 +39,7 @@ builder.Services.AddSwaggerGen(options =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
+                    Id = "ApiBearerAuth"
                 }
             },
             new string[] { }
@@ -50,12 +50,10 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<ContosoContext>(opt =>
     opt.UseNpgsql("Host=localhost;Database=contoso_pizza;Username=msa;Password=vcrn;Include Error Detail=true"));
 
-// Should use abstraction and concrete implementation for DI.
-// Resulting in obeying dependency inversion principle and more testable.
-builder.Services.AddScoped<PizzaService>();
-builder.Services.AddScoped<CourseService>();
-builder.Services.AddScoped<JwtService>();
-builder.Services.AddScoped<ApiKeyService>();
+builder.Services.AddScoped<IPizzaService, PizzaService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

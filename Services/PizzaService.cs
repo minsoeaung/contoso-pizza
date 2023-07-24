@@ -1,11 +1,10 @@
 using ContosoPizza.Data;
 using ContosoPizza.Entities;
-using ContosoPizza.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContosoPizza.Services;
 
-public class PizzaService
+public class PizzaService : IPizzaService
 {
     private readonly ContosoContext _context;
 

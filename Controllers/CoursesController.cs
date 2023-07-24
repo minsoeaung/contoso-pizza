@@ -14,13 +14,13 @@ namespace ContosoPizza.Controllers;
 [ApiController]
 public class CoursesController : ControllerBase
 {
-    private readonly CourseService _service;
+    private readonly ICourseService _service;
     private readonly IMapper _mapper;
 
     private const string AuthSchemes =
-        $"{JwtBearerDefaults.AuthenticationScheme},${ApiKeyDefaults.AuthenticationScheme}";
+        $"{JwtBearerDefaults.AuthenticationScheme},{ApiKeyDefaults.AuthenticationScheme}";
 
-    public CoursesController(CourseService service, IMapper mapper)
+    public CoursesController(ICourseService service, IMapper mapper)
     {
         _service = service;
         _mapper = mapper;

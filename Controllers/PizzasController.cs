@@ -1,5 +1,4 @@
 using ContosoPizza.Entities;
-using ContosoPizza.Models;
 using ContosoPizza.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +8,9 @@ namespace ContosoPizza.Controllers;
 [Route("api/[controller]")]
 public class PizzasController : ControllerBase
 {
-    private readonly PizzaService _service;
+    private readonly IPizzaService _service;
 
-    public PizzasController(PizzaService service)
+    public PizzasController(IPizzaService service)
     {
         _service = service;
     }

@@ -1,20 +1,16 @@
-using AutoMapper;
 using ContosoPizza.Data;
 using ContosoPizza.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContosoPizza.Services;
 
-public class CourseService
+public class CourseService : ICourseService
 {
     private readonly ContosoContext _context;
-    private readonly IMapper _mapper;
 
-
-    public CourseService(ContosoContext context, IMapper mapper)
+    public CourseService(ContosoContext context)
     {
         _context = context;
-        _mapper = mapper;
     }
 
     public async Task<(IEnumerable<Course>, PaginationMetaData)> GetCourses(int pageNumber, int pageSize)

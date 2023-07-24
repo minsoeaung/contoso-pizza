@@ -8,7 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ContosoPizza.Services;
 
-public class JwtService
+public class JwtService : IJwtService
 {
     private const int ExpirationMinutes = 1;
     private readonly IConfiguration _configuration;

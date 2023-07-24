@@ -1,10 +1,11 @@
 using ContosoPizza.Entities;
-using ContosoPizza.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ContosoPizza.Data;
 
-public class ContosoContext : DbContext
+public class ContosoContext : IdentityUserContext<IdentityUser>
 {
     public ContosoContext(DbContextOptions<ContosoContext> options) : base(options)
     {
@@ -21,8 +22,11 @@ public class ContosoContext : DbContext
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<Instructor> Instructors => Set<Instructor>();
     public DbSet<OfficeAssignment> OfficeAssignments => Set<OfficeAssignment>();
+    public DbSet<UserApiKey> UserApiKeys => Set<UserApiKey>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Call IdentityUserContext's own OnModelCreating
+        base.OnModelCreating(modelBuilder);
     }
 }

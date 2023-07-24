@@ -1,8 +1,11 @@
 using System.Text.Json;
 using AutoMapper;
+using ContosoPizza.Authentication.ApiKey;
 using ContosoPizza.Entities;
 using ContosoPizza.Models;
 using ContosoPizza.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ContosoPizza.Controllers;
@@ -14,12 +17,16 @@ public class CoursesController : ControllerBase
     private readonly CourseService _service;
     private readonly IMapper _mapper;
 
+    private const string AuthSchemes =
+        $"{JwtBearerDefaults.AuthenticationScheme},${ApiKeyDefaults.AuthenticationScheme}";
+
     public CoursesController(CourseService service, IMapper mapper)
     {
         _service = service;
         _mapper = mapper;
     }
 
+    [Authorize(AuthenticationSchemes = AuthSchemes)]
     [HttpGet]
     public async Task<IEnumerable<CourseViewModel>> GetCourses(int pageNumber = 1, int pageSize = 20)
     {

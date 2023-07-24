@@ -46,10 +46,8 @@ public class TodosController : ControllerBase
             if (formFile.Length <= 0) continue;
             var filePath = Path.GetTempFileName();
 
-            using (var stream = System.IO.File.Create(filePath))
-            {
-                await formFile.CopyToAsync(stream);
-            }
+            await using var stream = System.IO.File.Create(filePath);
+            await formFile.CopyToAsync(stream);
         }
 
         // Process uploaded files

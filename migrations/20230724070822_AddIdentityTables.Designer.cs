@@ -3,6 +3,7 @@ using System;
 using ContosoPizza.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ContosoPizza.migrations
 {
     [DbContext(typeof(ContosoContext))]
-    partial class ContosoContextModelSnapshot : ModelSnapshot
+    [Migration("20230724070822_AddIdentityTables")]
+    partial class AddIdentityTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -277,32 +280,6 @@ namespace ContosoPizza.migrations
                     b.ToTable("Toppings");
                 });
 
-            modelBuilder.Entity("ContosoPizza.Entities.UserApiKey", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("Value")
-                        .IsUnique();
-
-                    b.ToTable("UserApiKeys");
-                });
-
             modelBuilder.Entity("CourseInstructor", b =>
                 {
                     b.Property<int>("CoursesId")
@@ -520,17 +497,6 @@ namespace ContosoPizza.migrations
                         .HasForeignKey("SauceId");
 
                     b.Navigation("Sauce");
-                });
-
-            modelBuilder.Entity("ContosoPizza.Entities.UserApiKey", b =>
-                {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CourseInstructor", b =>

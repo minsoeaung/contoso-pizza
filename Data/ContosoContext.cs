@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ContosoPizza.Data;
 
-public class ContosoContext : IdentityUserContext<IdentityUser>
+public class ContosoContext : IdentityDbContext<IdentityUser, IdentityRole, string>
 {
     public ContosoContext(DbContextOptions<ContosoContext> options) : base(options)
     {

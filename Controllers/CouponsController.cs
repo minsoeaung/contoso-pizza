@@ -22,7 +22,7 @@ public class CouponsController : ControllerBase
         _context = context;
     }
 
-    [Authorize(AuthenticationSchemes = AuthSchemes)]
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     public IEnumerable<Coupon> Get()
     {

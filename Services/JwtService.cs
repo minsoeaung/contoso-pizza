@@ -2,8 +2,10 @@ using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using ContosoPizza.Configurations;
 using ContosoPizza.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ContosoPizza.Services;
@@ -11,11 +13,11 @@ namespace ContosoPizza.Services;
 public class JwtService : IJwtService
 {
     private const int ExpirationMinutes = 5;
-    private readonly IConfiguration _configuration;
+    private readonly JwtConfig _jwtConfig;
 
-    public JwtService(IConfiguration configuration)
+    public JwtService(IOptions<JwtConfig> jwtConfig)
     {
-        _configuration = configuration;
+        _jwtConfig = jwtConfig.Value;
     }
 
     public UserLoginResponseDto CreateToken(IdentityUser user, IList<string> roles)
@@ -39,9 +41,9 @@ public class JwtService : IJwtService
 
     private JwtSecurityToken CreateJwtToken(IEnumerable<Claim> claims, SigningCredentials credentials,
         DateTime expiration) =>
-        new JwtSecurityToken(
-            _configuration["JwtSettings:Issuer"],
-            _configuration["JwtSettings:Audience"],
+        new(
+            _jwtConfig.Issuer,
+            _jwtConfig.Audience,
             claims,
             expires: expiration,
             signingCredentials: credentials
@@ -51,11 +53,11 @@ public class JwtService : IJwtService
     {
         var claims = new List<Claim>()
         {
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)),
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Name, user.UserName ?? string.Empty),
-            new Claim(ClaimTypes.Email, user.Email ?? string.Empty)
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)),
+            new(ClaimTypes.NameIdentifier, user.Id),
+            new(ClaimTypes.Name, user.UserName ?? string.Empty),
+            new(ClaimTypes.Email, user.Email ?? string.Empty)
         };
         claims.AddRange(roles.Select(userRole => new Claim(ClaimTypes.Role, userRole)));
         return claims;
@@ -63,11 +65,7 @@ public class JwtService : IJwtService
 
     private SigningCredentials CreateSigningCredentials() =>
         new(
-            new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(
-                    _configuration["JwtSettings:Key"] ?? throw new InvalidOperationException("Jwt key missing!")
-                )
-            ),
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfig.Key)),
             SecurityAlgorithms.HmacSha256
         );
 }

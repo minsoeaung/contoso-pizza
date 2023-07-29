@@ -4,6 +4,7 @@ using ContosoPizza.Authentication.ApiKey;
 using ContosoPizza.Configurations;
 using ContosoPizza.Data;
 using ContosoPizza.Services;
+using ContosoPizza.Settings;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -54,15 +55,18 @@ builder.Services.AddScoped<IPizzaService, PizzaService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
+builder.Services.AddTransient<IMailService, MailService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<JwtConfig>(config.GetSection("JwtSettings"));
+builder.Services.Configure<MailConfig>(config.GetSection("MailSettings"));
 
 builder.Services.AddIdentityCore<IdentityUser>(options =>
     {
         options.SignIn.RequireConfirmedAccount = false;
         options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedEmail = true;
         options.Password.RequireDigit = false;
         options.Password.RequiredLength = 6;
         options.Password.RequireNonAlphanumeric = false;

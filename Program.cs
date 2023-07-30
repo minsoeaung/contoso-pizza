@@ -68,6 +68,7 @@ builder.Services.AddScoped<IPizzaService, PizzaService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddTransient<IMailService, MailService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -87,7 +88,8 @@ builder.Services.AddIdentityCore<IdentityUser>(options =>
         options.Password.RequireLowercase = false;
     })
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ContosoContext>();
+    .AddEntityFrameworkStores<ContosoContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication(opt =>
     {

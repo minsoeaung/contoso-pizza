@@ -25,16 +25,19 @@ public class MailService : IMailService
 
         var builder = new BodyBuilder();
 
-        foreach (var file in mailRequest.Attachments.Where(file => file.Length > 0))
+        if (mailRequest.Attachments != null)
         {
-            byte[] fileBytes;
-            using (var ms = new MemoryStream())
+            foreach (var file in mailRequest.Attachments.Where(file => file.Length > 0))
             {
-                await file.CopyToAsync(ms);
-                fileBytes = ms.ToArray();
-            }
+                byte[] fileBytes;
+                using (var ms = new MemoryStream())
+                {
+                    await file.CopyToAsync(ms);
+                    fileBytes = ms.ToArray();
+                }
 
-            builder.Attachments.Add(file.FileName, fileBytes, ContentType.Parse(file.ContentType));
+                builder.Attachments.Add(file.FileName, fileBytes, ContentType.Parse(file.ContentType));
+            }
         }
 
         builder.HtmlBody = mailRequest.Body;

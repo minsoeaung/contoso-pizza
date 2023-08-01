@@ -44,6 +44,28 @@ public class PizzasController : ControllerBase
         return response.HttpStatusCode == HttpStatusCode.OK ? Ok() : BadRequest();
     }
 
+    [HttpGet("{id}/image")]
+    public async Task<IActionResult> GetImage(int id)
+    {
+        var response = await _service.GetImageAsync(id);
+        if (response is null)
+            return NotFound();
+        
+        return File(response.ResponseStream, response.Headers.ContentType);
+    }
+
+    [HttpDelete("{id}/image")]
+    public async Task<IActionResult> DeleteImage(int id)
+    {
+        var response = await _service.DeleteImageAsync(id);
+        return response.HttpStatusCode switch
+        {
+            HttpStatusCode.NoContent => Ok(),
+            HttpStatusCode.NotFound => NotFound(),
+            _ => BadRequest()
+        };
+    }
+
     [HttpPut("{id}/addtopping")]
     public IActionResult AddTopping(int id, int toppingId)
     {

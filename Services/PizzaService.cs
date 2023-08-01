@@ -106,4 +106,33 @@ public class PizzaService : IPizzaService
 
         return await _s3.PutObjectAsync(pubObjectRequest);
     }
+
+    public async Task<GetObjectResponse?> GetImageAsync(int id)
+    {
+        try
+        {
+            var getObjectRequest = new GetObjectRequest
+            {
+                BucketName = _awsConfig.PublicBucketName,
+                Key = $"pizza_images/{id}"
+            };
+
+            return await _s3.GetObjectAsync(getObjectRequest);
+        }
+        catch (AmazonS3Exception s3Exception) when (s3Exception.Message == "The specified key does not exist.")
+        {
+            return null;
+        }
+    }
+
+    public async Task<DeleteObjectResponse> DeleteImageAsync(int id)
+    {
+        var deleteObjectRequest = new DeleteObjectRequest
+        {
+            BucketName = _awsConfig.PublicBucketName,
+            Key = $"pizza_images/{id}"
+        };
+
+        return await _s3.DeleteObjectAsync(deleteObjectRequest);
+    }
 }

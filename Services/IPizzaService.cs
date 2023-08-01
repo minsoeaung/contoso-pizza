@@ -18,4 +18,8 @@ public interface IPizzaService
     void DeleteById(int id);
 
     Task<PutObjectResponse> UploadImageAsync(int id, IFormFile file);
+
+    Task<GetObjectResponse?> GetImageAsync(int id);
+
+    Task<DeleteObjectResponse> DeleteImageAsync(int id);
 }

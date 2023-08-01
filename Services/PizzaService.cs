@@ -1,16 +1,24 @@
+using Amazon.S3;
+using Amazon.S3.Model;
+using ContosoPizza.Configurations;
 using ContosoPizza.Data;
 using ContosoPizza.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ContosoPizza.Services;
 
 public class PizzaService : IPizzaService
 {
     private readonly ContosoContext _context;
+    private readonly IAmazonS3 _s3;
+    private readonly AwsConfig _awsConfig;
 
-    public PizzaService(ContosoContext context)
+    public PizzaService(ContosoContext context, IAmazonS3 s3, IOptions<AwsConfig> awsConfig)
     {
         _context = context;
+        _s3 = s3;
+        _awsConfig = awsConfig.Value;
     }
 
     public IEnumerable<Pizza> GetAll()
@@ -79,5 +87,23 @@ public class PizzaService : IPizzaService
         if (pizzaToDelete is null) return;
         _context.Pizzas.Remove(pizzaToDelete);
         _context.SaveChanges();
+    }
+
+    public async Task<PutObjectResponse> UploadImageAsync(int id, IFormFile file)
+    {
+        var pubObjectRequest = new PutObjectRequest()
+        {
+            BucketName = _awsConfig.PublicBucketName,
+            Key = $"pizza_images/{id}",
+            ContentType = file.ContentType,
+            InputStream = file.OpenReadStream(), // Better than ContentBody
+            Metadata =
+            {
+                ["x-amz-meta-originalname"] = file.FileName,
+                ["x-amz-meta-extension"] = Path.GetExtension(file.FileName)
+            }
+        };
+
+        return await _s3.PutObjectAsync(pubObjectRequest);
     }
 }

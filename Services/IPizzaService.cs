@@ -1,3 +1,4 @@
+using Amazon.S3.Model;
 using ContosoPizza.Entities;
 
 namespace ContosoPizza.Services;
@@ -15,4 +16,6 @@ public interface IPizzaService
     void AddTopping(int pizzaId, int toppingId);
 
     void DeleteById(int id);
+
+    Task<PutObjectResponse> UploadImageAsync(int id, IFormFile file);
 }

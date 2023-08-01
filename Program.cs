@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using Amazon.S3;
 using ContosoPizza.Authentication.ApiKey;
 using ContosoPizza.Configurations;
 using ContosoPizza.Data;
@@ -23,8 +24,6 @@ builder.Services.AddCors(options =>
         policy => { policy.WithOrigins().AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); }
     );
 });
-
-var config = builder.Configuration;
 
 // AddMvc covers everything.
 // https://nitishkaushik.com/addmvc-vs-addcontrollerswithviews-vs-addcontrollers-vs-addrazorpages-asp-net-core/
@@ -62,7 +61,11 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddDbContext<ContosoContext>(opt =>
-    opt.UseNpgsql("Host=localhost;Database=contoso_pizza;Username=msa;Password=vcrn;Include Error Detail=true"));
+    opt.UseNpgsql("Host=localhost;Database=contoso_pizza;Username=msa;Password=vcrn"));
+
+builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<MailConfig>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.Configure<AwsConfig>(builder.Configuration.GetSection("AWS"));
 
 builder.Services.AddScoped<IPizzaService, PizzaService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
@@ -72,9 +75,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddTransient<IMailService, MailService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-builder.Services.Configure<JwtConfig>(config.GetSection("JwtSettings"));
-builder.Services.Configure<MailConfig>(config.GetSection("MailSettings"));
+builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
+builder.Services.AddAWSService<IAmazonS3>();
 
 builder.Services.AddIdentityCore<IdentityUser>(options =>
     {
@@ -102,9 +104,10 @@ builder.Services.AddAuthentication(opt =>
         jwtBearerOptions.SaveToken = true;
         jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
         {
-            ValidIssuer = config["JwtSettings:Issuer"],
-            ValidAudience = config["JwtSettings:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["JwtSettings:Key"]!)),
+            ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
+            ValidAudience = builder.Configuration["JwtSettings:Audience"],
+            IssuerSigningKey =
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]!)),
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,

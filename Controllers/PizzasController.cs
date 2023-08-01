@@ -1,3 +1,4 @@
+using System.Net;
 using ContosoPizza.Entities;
 using ContosoPizza.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -26,15 +27,8 @@ public class PizzasController : ControllerBase
     public ActionResult<Pizza> GetById(int id)
     {
         var pizza = _service.GetById(id);
-
-        if (pizza is not null)
-        {
-            return pizza;
-        }
-
-        return NotFound();
+        return pizza is null ? NotFound() : pizza;
     }
-
 
     [HttpPost]
     public IActionResult Create(Pizza newPizza)
@@ -43,18 +37,23 @@ public class PizzasController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = pizza!.Id }, pizza);
     }
 
+    [HttpPost("{id}/image")]
+    public async Task<IActionResult> UploadImage(int id, IFormFile file)
+    {
+        var response = await _service.UploadImageAsync(id, file);
+        return response.HttpStatusCode == HttpStatusCode.OK ? Ok() : BadRequest();
+    }
+
     [HttpPut("{id}/addtopping")]
     public IActionResult AddTopping(int id, int toppingId)
     {
         var pizzaToUpdate = _service.GetById(id);
 
-        if (pizzaToUpdate is not null)
-        {
-            _service.AddTopping(id, toppingId);
-            return NoContent();
-        }
+        if (pizzaToUpdate is null)
+            return NotFound();
 
-        return NotFound();
+        _service.AddTopping(id, toppingId);
+        return NoContent();
     }
 
     [HttpPut("{id}/updatesauce")]
@@ -62,13 +61,11 @@ public class PizzasController : ControllerBase
     {
         var pizzaToUpdate = _service.GetById(id);
 
-        if (pizzaToUpdate is not null)
-        {
-            _service.UpdateSauce(id, sauceId);
-            return NoContent();
-        }
+        if (pizzaToUpdate is null)
+            return NotFound();
 
-        return NotFound();
+        _service.UpdateSauce(id, sauceId);
+        return NoContent();
     }
 
     [HttpDelete("{id}")]
@@ -76,12 +73,10 @@ public class PizzasController : ControllerBase
     {
         var pizza = _service.GetById(id);
 
-        if (pizza is not null)
-        {
-            _service.DeleteById(id);
-            return Ok();
-        }
+        if (pizza is null)
+            return NotFound();
 
-        return NotFound();
+        _service.DeleteById(id);
+        return Ok();
     }
 }

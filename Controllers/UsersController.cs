@@ -1,8 +1,12 @@
+using ContosoPizza.Configurations;
 using ContosoPizza.Entities;
 using ContosoPizza.Models;
 using ContosoPizza.Services;
+using Google.Apis.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace ContosoPizza.Controllers;
 
@@ -15,24 +19,27 @@ public class UsersController : ControllerBase
     private readonly IJwtService _jwtService;
     private readonly IApiKeyService _apiKeyService;
     private readonly IMailService _mailService;
-    private readonly IUserService _userService;
+    private readonly IUserService _service;
+    private readonly GoogleConfig _googleConfig;
 
     public UsersController(UserManager<IdentityUser> userManager, IJwtService jwtService, IApiKeyService apiKeyService,
         RoleManager<IdentityRole> roleManager, IMailService mailService,
-        IUserService userService)
+        IUserService service, IOptions<GoogleConfig> googleConfig)
     {
         _userManager = userManager;
         _jwtService = jwtService;
         _apiKeyService = apiKeyService;
         _roleManager = roleManager;
         _mailService = mailService;
-        _userService = userService;
+        _service = service;
+        _googleConfig = googleConfig.Value;
     }
 
+    [Authorize(Policy = "MustBeMe")]
     [HttpGet]
     public async Task<IEnumerable<UserCreationResponseDto>> GetUsers()
     {
-        return await _userService.GetUsers();
+        return await _service.GetUsers();
     }
 
     [HttpGet("{username}")]
@@ -40,7 +47,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<UserCreationResponseDto>> GetUser(string username)
     {
-        var user = await _userService.GetUser(username);
+        var user = await _service.GetUser(username);
         return user is null ? NotFound() : user;
     }
 
@@ -49,7 +56,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult> ConfirmEmail(string userId, string token)
     {
-        var success = await _userService.ConfirmEmail(userId, token);
+        var success = await _service.ConfirmEmail(userId, token);
         return success ? Ok() : BadRequest();
     }
 
@@ -138,6 +145,39 @@ public class UsersController : ControllerBase
             return BadRequest();
 
         return _jwtService.CreateToken(user, roles);
+    }
+
+    [HttpPost("google-login")]
+    public async Task<ActionResult<UserLoginResponseDto>> GoogleLogin(UserGoogleLoginDto userGoogleLoginDto)
+    {
+        try
+        {
+            var payload = await GoogleJsonWebSignature.ValidateAsync(
+                userGoogleLoginDto.IdToken,
+                new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = new[] { _googleConfig.ClientId }
+                }
+            );
+
+            var user = await _service.GetOrCreateExternalLoginUser(
+                "google",
+                payload.Subject,
+                payload.Email,
+                payload.EmailVerified
+            );
+
+            if (user is null)
+                return BadRequest();
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return _jwtService.CreateToken(user, roles);
+        }
+        catch (Exception)
+        {
+            return BadRequest();
+        }
     }
 
     [HttpPost("api-key")]

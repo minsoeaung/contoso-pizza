@@ -9,4 +9,6 @@ public interface IUserService
     Task<UserCreationResponseDto?> GetUser(string username);
 
     Task<bool> ConfirmEmail(string userId, string token);
+
+    Task<IdentityUser?> GetOrCreateExternalLoginUser(string provider, string key, string email, bool emailConfirmed);
 }

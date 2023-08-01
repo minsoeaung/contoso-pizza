@@ -13,15 +13,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
-const string myAllowSpecificOrigins = "_allowAll";
+const string origins = "_myLocalReactApp";
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
-        name: myAllowSpecificOrigins,
-        policy => { policy.WithOrigins().AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); }
+        name: origins,
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000", "http://localhost:5173").AllowAnyHeader().AllowAnyMethod();
+        }
     );
 });
 
@@ -66,6 +69,7 @@ builder.Services.AddDbContext<ContosoContext>(opt =>
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<MailConfig>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.Configure<AwsConfig>(builder.Configuration.GetSection("AWS"));
+builder.Services.Configure<GoogleConfig>(builder.Configuration.GetSection("Google"));
 
 builder.Services.AddScoped<IPizzaService, PizzaService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
@@ -121,7 +125,10 @@ builder.Services.AddAuthentication(opt =>
         options => { }
     );
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("MustBeMe", policy => policy.RequireUserName("minsoeaung"));
+});
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -138,9 +145,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors(myAllowSpecificOrigins);
-
-app.UseAuthorization();
+app.UseCors(origins);
 
 app.UseAuthorization();
 

@@ -67,4 +67,38 @@ public class UserService : IUserService
         var result = await _userManager.ConfirmEmailAsync(user, token);
         return result.Succeeded;
     }
+
+    public async Task<IdentityUser?> GetOrCreateExternalLoginUser(
+        string provider,
+        string key,
+        string email,
+        bool emailConfirmed
+    )
+    {
+        var user = await _userManager.FindByLoginAsync(provider, key);
+        if (user is not null)
+        {
+            return user;
+        }
+
+        user = await _userManager.FindByEmailAsync(email);
+
+        if (user is null)
+        {
+            user = new IdentityUser
+            {
+                Email = email,
+                UserName = email,
+                EmailConfirmed = emailConfirmed
+            };
+
+            await _userManager.CreateAsync(user);
+        }
+
+        // Link
+        var info = new UserLoginInfo(provider, key, provider.ToUpperInvariant());
+        var result = await _userManager.AddLoginAsync(user, info);
+
+        return result.Succeeded ? user : null;
+    }
 }

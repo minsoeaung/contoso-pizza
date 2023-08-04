@@ -5,5 +5,5 @@ namespace ContosoPizza.Services;
 
 public interface IJwtService
 {
-    UserLoginResponseDto CreateToken(IdentityUser user, IList<string> roles);
+    AuthenticationResult CreateToken(IdentityUser user, IList<string>? roles);
 }

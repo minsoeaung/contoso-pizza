@@ -1,6 +1,6 @@
 namespace ContosoPizza.Models;
 
-public class UserLoginResponseDto
+public class AuthenticationResult
 {
     public string AccessToken { get; set; }
     public DateTime Expiration { get; set; }

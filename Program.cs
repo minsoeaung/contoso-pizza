@@ -63,13 +63,14 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddDbContext<ContosoContext>(opt =>
-    opt.UseNpgsql("Host=localhost;Database=contoso_pizza;Username=msa;Password=vcrn"));
+builder.Services.AddDbContext<ContosoContext>(opt => opt.UseNpgsql(builder.Configuration["Psql:connectionString"]));
 
 builder.Services.Configure<JwtConfig>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<MailConfig>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.Configure<AwsConfig>(builder.Configuration.GetSection("AWS"));
 builder.Services.Configure<GoogleConfig>(builder.Configuration.GetSection("Google"));
+builder.Services.Configure<SmsConfig>(builder.Configuration.GetSection("Twilio"));
+builder.Services.Configure<FacebookConfig>(builder.Configuration.GetSection("Facebook"));
 
 builder.Services.AddScoped<IPizzaService, PizzaService>();
 builder.Services.AddScoped<ICourseService, CourseService>();
@@ -77,10 +78,12 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IApiKeyService, ApiKeyService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddTransient<IMailService, MailService>();
+builder.Services.AddTransient<ISmsService, SmsService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
 builder.Services.AddAWSService<IAmazonS3>();
+builder.Services.AddHttpClient();
 
 builder.Services.AddIdentityCore<IdentityUser>(options =>
     {

@@ -11,8 +11,10 @@
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.7" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.201.4" />
+    <PackageReference Include="Bogus" Version="34.0.2" />
     <PackageReference Include="Google.Apis.Auth" Version="1.61.0" />
     <PackageReference Include="MailKit" Version="4.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="7.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.9" />
@@ -36,6 +38,7 @@
     <PackageReference Include="MimeKit" Version="4.1.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Twilio" Version="6.10.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,5 +53,7 @@
     <_ContentIncludedByDefault Remove="Views\TestMvc\Edit.cshtml" />
     <_ContentIncludedByDefault Remove="Views\TestMvc\Index.cshtml" />
   </ItemGroup>
+
+
 
 </Project>

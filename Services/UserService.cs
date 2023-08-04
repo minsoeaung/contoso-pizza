@@ -1,8 +1,12 @@
+using System.Text.Json;
 using AutoMapper;
+using ContosoPizza.Configurations;
 using ContosoPizza.Data;
+using ContosoPizza.External.Contracts;
 using ContosoPizza.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ContosoPizza.Services;
 
@@ -11,15 +15,23 @@ public class UserService : IUserService
     private readonly ContosoContext _contosoContext;
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IMapper _mapper;
-    private readonly IMailService _mailService;
+    private readonly FacebookConfig _facebookConfig;
+    private readonly IHttpClientFactory _httpClientFactory;
+
+    private const string FacebookTokenValidationUrl =
+        "https://graph.facebook.com/debug_token?input_token={0}&access_token={1}|{2}";
+
+    private const string FacebookUserInfoUrl =
+        "https://graph.facebook.com/me?fields=first_name,last_name,picture,email&access_token={0}";
 
     public UserService(ContosoContext contosoContext, UserManager<IdentityUser> userManager, IMapper mapper,
-        IMailService mailService)
+        IOptions<FacebookConfig> facebookConfig, IHttpClientFactory httpClientFactory)
     {
         _contosoContext = contosoContext;
         _userManager = userManager;
         _mapper = mapper;
-        _mailService = mailService;
+        _httpClientFactory = httpClientFactory;
+        _facebookConfig = facebookConfig.Value;
     }
 
     public async Task<IEnumerable<UserCreationResponseDto>> GetUsers()
@@ -58,16 +70,6 @@ public class UserService : IUserService
         return userWithRoles;
     }
 
-    public async Task<bool> ConfirmEmail(string userId, string token)
-    {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
-            return false;
-
-        var result = await _userManager.ConfirmEmailAsync(user, token);
-        return result.Succeeded;
-    }
-
     public async Task<IdentityUser?> GetOrCreateExternalLoginUser(
         string provider,
         string key,
@@ -100,5 +102,28 @@ public class UserService : IUserService
         var result = await _userManager.AddLoginAsync(user, info);
 
         return result.Succeeded ? user : null;
+    }
+
+    public async Task<FacebookTokenValidationResult?> ValidateFacebookAccessTokenAsync(string accessToken)
+    {
+        var formattedUrl = string.Format(FacebookTokenValidationUrl, accessToken, _facebookConfig.AppId,
+            _facebookConfig.AppSecret);
+
+        var result = await _httpClientFactory.CreateClient().GetAsync(formattedUrl);
+        result.EnsureSuccessStatusCode();
+
+        var responseAsString = await result.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<FacebookTokenValidationResult>(responseAsString);
+    }
+
+    public async Task<FacebookUserInfoResult?> GetFacebookUserInfoAsync(string accessToken)
+    {
+        var formattedUrl = string.Format(FacebookUserInfoUrl, accessToken);
+
+        var result = await _httpClientFactory.CreateClient().GetAsync(formattedUrl);
+        result.EnsureSuccessStatusCode();
+
+        var responseAsString = await result.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<FacebookUserInfoResult>(responseAsString);
     }
 }

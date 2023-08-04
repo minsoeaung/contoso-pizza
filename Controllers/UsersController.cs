@@ -48,6 +48,7 @@ public class UsersController : ControllerBase
     public async Task<ActionResult<UserCreationResponseDto>> GetUser(string username)
     {
         var user = await _service.GetUser(username);
+
         return user is null ? NotFound() : user;
     }
 
@@ -56,8 +57,12 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult> ConfirmEmail(string userId, string token)
     {
-        var success = await _service.ConfirmEmail(userId, token);
-        return success ? Ok() : BadRequest();
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user is null)
+            return NotFound();
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+        return result.Succeeded ? Ok("Your email is confirmed.") : BadRequest(result.Errors);
     }
 
     [HttpPost("send-confirm-email-url")]
@@ -125,10 +130,10 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost("login")]
-    [ProducesResponseType(typeof(UserLoginResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AuthenticationResult), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<UserLoginResponseDto>> Login(UserLoginDto userLoginDto)
+    public async Task<ActionResult<AuthenticationResult>> Login(UserLoginDto userLoginDto)
     {
         if (!ModelState.IsValid)
             return BadRequest();
@@ -147,13 +152,49 @@ public class UsersController : ControllerBase
         return _jwtService.CreateToken(user, roles);
     }
 
-    [HttpPost("google-login")]
-    public async Task<ActionResult<UserLoginResponseDto>> GoogleLogin(UserGoogleLoginDto userGoogleLoginDto)
+    // https://developers.facebook.com/docs/facebook-login/guides/advanced/manual-flow#checktoken
+    [HttpPost("facebook-login")]
+    public async Task<ActionResult<AuthenticationResult>> FacebookLogin(UserExternalLoginDto request)
     {
+        if (string.IsNullOrWhiteSpace(request.AccessToken)) return BadRequest();
+
+        var validatedTokenResult = await _service.ValidateFacebookAccessTokenAsync(request.AccessToken);
+        if (validatedTokenResult is null || !validatedTokenResult.Data.IsValid)
+            return BadRequest();
+
+        var facebookUserInfo = await _service.GetFacebookUserInfoAsync(request.AccessToken);
+        if (facebookUserInfo is null)
+            return BadRequest();
+
+        var existingUser = await _userManager.FindByEmailAsync(facebookUserInfo.Email);
+        if (existingUser is null)
+        {
+            var newUser = new IdentityUser
+            {
+                Email = facebookUserInfo.Email,
+                UserName = facebookUserInfo.Email
+            };
+            var createdResult = await _userManager.CreateAsync(newUser);
+
+            if (!createdResult.Succeeded)
+                return BadRequest(createdResult.Errors);
+
+            return _jwtService.CreateToken(newUser, null);
+        }
+
+        var roles = await _userManager.GetRolesAsync(existingUser);
+        return _jwtService.CreateToken(existingUser, roles);
+    }
+
+    [HttpPost("google-login")]
+    public async Task<ActionResult<AuthenticationResult>> GoogleLogin(UserExternalLoginDto request)
+    {
+        if (string.IsNullOrWhiteSpace(request.AccessToken)) return BadRequest();
+
         try
         {
             var payload = await GoogleJsonWebSignature.ValidateAsync(
-                userGoogleLoginDto.IdToken,
+                request.AccessToken,
                 new GoogleJsonWebSignature.ValidationSettings
                 {
                     Audience = new[] { _googleConfig.ClientId }

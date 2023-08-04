@@ -20,7 +20,7 @@ public class JwtService : IJwtService
         _jwtConfig = jwtConfig.Value;
     }
 
-    public UserLoginResponseDto CreateToken(IdentityUser user, IList<string> roles)
+    public AuthenticationResult CreateToken(IdentityUser user, IList<string>? roles)
     {
         var expiration = DateTime.UtcNow.AddMinutes(ExpirationMinutes);
 
@@ -32,7 +32,7 @@ public class JwtService : IJwtService
 
         var tokenHandler = new JwtSecurityTokenHandler();
 
-        return new UserLoginResponseDto
+        return new AuthenticationResult
         {
             AccessToken = tokenHandler.WriteToken(token),
             Expiration = expiration
@@ -49,7 +49,7 @@ public class JwtService : IJwtService
             signingCredentials: credentials
         );
 
-    private static IEnumerable<Claim> CreateClaims(IdentityUser user, IEnumerable<string> roles)
+    private static IEnumerable<Claim> CreateClaims(IdentityUser user, IEnumerable<string>? roles)
     {
         var claims = new List<Claim>()
         {
@@ -59,7 +59,12 @@ public class JwtService : IJwtService
             new(ClaimTypes.Name, user.UserName ?? string.Empty),
             new(ClaimTypes.Email, user.Email ?? string.Empty)
         };
-        claims.AddRange(roles.Select(userRole => new Claim(ClaimTypes.Role, userRole)));
+
+        if (roles != null)
+        {
+            claims.AddRange(roles.Select(userRole => new Claim(ClaimTypes.Role, userRole)));
+        }
+
         return claims;
     }
 

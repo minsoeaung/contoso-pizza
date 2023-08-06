@@ -9,6 +9,8 @@ using ContosoPizza.Settings;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -28,15 +30,38 @@ builder.Services.AddCors(options =>
     );
 });
 
-// AddMvc covers everything.
 // https://nitishkaushik.com/addmvc-vs-addcontrollerswithviews-vs-addcontrollers-vs-addrazorpages-asp-net-core/
 builder.Services.AddMvc()
     .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles; });
 
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = ApiVersion.Default;
+    options.ApiVersionReader = new HeaderApiVersionReader("X-Version");
+    options.ReportApiVersions = true;
+});
+
+builder.Services.AddVersionedApiExplorer(options => { options.GroupNameFormat = "'v'VVV"; });
+
 builder.Services.AddSwaggerGen(options =>
 {
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "Contoso API",
+        Description = "ASP.NET Core Web API for Contoso",
+    });
+
+    options.SwaggerDoc("v2", new OpenApiInfo
+    {
+        Version = "v2",
+        Title = "Contoso API",
+        Description = "ASP.NET Core Web API for Contoso Version 2",
+    });
+
     options.AddSecurityDefinition("ApiBearerAuth", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -46,7 +71,6 @@ builder.Services.AddSwaggerGen(options =>
         BearerFormat = "JWT",
         Scheme = "Bearer"
     });
-
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -58,7 +82,7 @@ builder.Services.AddSwaggerGen(options =>
                     Id = "ApiBearerAuth"
                 }
             },
-            new string[] { }
+            Array.Empty<string>()
         }
     });
 });
@@ -140,8 +164,13 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(options => options.RouteTemplate = "swagger/{documentName}/swagger.json");
+    app.UseSwaggerUI(options =>
+    {
+        options.DocumentTitle = "Contoso Title";
+        options.SwaggerEndpoint($"/swagger/v1/swagger.json", "v1");
+        options.SwaggerEndpoint($"/swagger/v2/swagger.json", "v2");
+    });
     app.UseDeveloperExceptionPage();
     app.UseMigrationsEndPoint();
 }

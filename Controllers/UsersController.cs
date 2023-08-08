@@ -166,24 +166,19 @@ public class UsersController : ControllerBase
         if (facebookUserInfo is null)
             return BadRequest();
 
-        var existingUser = await _userManager.FindByEmailAsync(facebookUserInfo.Email);
-        if (existingUser is null)
-        {
-            var newUser = new IdentityUser
-            {
-                Email = facebookUserInfo.Email,
-                UserName = facebookUserInfo.Email
-            };
-            var createdResult = await _userManager.CreateAsync(newUser);
+        var user = await _service.GetOrCreateExternalLoginUser(
+            "facebook",
+            facebookUserInfo.Id,
+            facebookUserInfo.Email,
+            false
+        );
 
-            if (!createdResult.Succeeded)
-                return BadRequest(createdResult.Errors);
+        if (user is null)
+            return BadRequest();
 
-            return _jwtService.CreateToken(newUser, null);
-        }
+        var roles = await _userManager.GetRolesAsync(user);
 
-        var roles = await _userManager.GetRolesAsync(existingUser);
-        return _jwtService.CreateToken(existingUser, roles);
+        return _jwtService.CreateToken(user, roles);
     }
 
     [HttpPost("google-login")]
